@@ -1,10 +1,15 @@
 ## 클래스 설명
 
  SpawnManager : Monster를 특정 주기로 계속 소환
+
  Monster : 몬스터 객체
+
  MonsterStateModule : 몬스터의 상태를 관리
+
  MonsterStateAbstract : 몬스터 상태 추상 클래스
+
  MonsterState상태 : 몬스터의 상태 구현
+ 
  MonsterMovementModule : 몬스터의 이동 관련 처리
 
 ## 대략적인 로직 설명
