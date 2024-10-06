@@ -14,6 +14,8 @@ public class SpawnManager : MonoBehaviour
 
     IEnumerator SpawnMonsterCoroutine()
     {
+        int count = 0;
+        //while (count++ < 2)
         while (true)
         {
             // 몬스터 생성

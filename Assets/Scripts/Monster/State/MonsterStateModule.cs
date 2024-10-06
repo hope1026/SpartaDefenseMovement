@@ -26,8 +26,10 @@ public class MonsterStateModule
         if (CanTransition(newStateType_) == false)
             return;
 
+        MonsterStateType oldState = MonsterStateType.FORWARD;
         if (_currentState != null)
         {
+            oldState = _currentState.GetStateType();
             _currentState.ExitState();
         }
 
@@ -35,6 +37,7 @@ public class MonsterStateModule
         {
             newState.EnterState();
             _currentState = newState;
+            Debug.Log($"Change State {oldState} -> {newStateType_}");
         }
         else
         {

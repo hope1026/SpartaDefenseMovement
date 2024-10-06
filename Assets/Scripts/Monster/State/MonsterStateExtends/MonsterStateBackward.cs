@@ -38,7 +38,7 @@ public class MonsterStateBackward : MonsterStateAbstract
     private IEnumerator BackwardCoroutine()
     {
         // 이동이 완료될 때까지 대기(에니메이션이 없어 시간으로 처리)
-        yield return new WaitForSeconds(0.3f);
+        yield return new WaitForSeconds(1f);
         
         //뒤에 몬스터가 있으면 뒤로 계속이동, 없으면 FORWARD 로 변경하여 점프처리 
         Monster behindMonster = _ownerMonster.FindBehindMonster();

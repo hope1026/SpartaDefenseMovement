@@ -18,7 +18,7 @@ public class MonsterStateJump : MonsterStateAbstract
 
     public override void UpdateState()
     {
-        if (_ownerMonster.MovementModule.MovementStateType != MonsterMovementStateType.FORWARD)
+        if (!_ownerMonster.MovementModule.IsJumping)
         {
             canTransitionToOtherState = true;
             _ownerStateModule.ChangeState(MonsterStateType.FORWARD);
