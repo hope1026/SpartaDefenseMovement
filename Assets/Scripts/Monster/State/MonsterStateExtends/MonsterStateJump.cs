@@ -5,9 +5,9 @@ public class MonsterStateJump : MonsterStateAbstract
     public MonsterStateJump(MonsterStateModule ownerStateModule_, Monster ownerMonster_)
         : base(ownerStateModule_, ownerMonster_) { }
 
-    public override void EnterState()
+    public override void EnterState(ParamsAbstract params_)
     {
-        Monster forwardMonster = _ownerMonster.FindForwardMonster();
+        Monster forwardMonster = _ownerMonster.FindForwardMonsterWithoutJumpOrFall();
         if (forwardMonster)
         {
             float jumpTargetY = forwardMonster.transform.position.y + (forwardMonster.GetCollisionRadius() * 2f);
@@ -18,7 +18,7 @@ public class MonsterStateJump : MonsterStateAbstract
 
     public override void UpdateState()
     {
-        if (_ownerMonster.MovementModule.MovementStateType != MonsterMovementStateType.FORWARD)
+        if (_ownerMonster.MovementModule.MovementStateType != MonsterMovementStateType.JUMP)
         {
             canTransitionToOtherState = true;
             _ownerStateModule.ChangeState(MonsterStateType.FORWARD);

@@ -8,7 +8,7 @@ public class MonsterStateAttack : MonsterStateAbstract
     public MonsterStateAttack(MonsterStateModule ownerStateModule_, Monster ownerMonster_)
         : base(ownerStateModule_, ownerMonster_) { }
 
-    public override void EnterState()
+    public override void EnterState(ParamsAbstract params_)
     {
         canTransitionToOtherState = false;
         _ownerMonster.MovementModule.Stop();
@@ -22,6 +22,21 @@ public class MonsterStateAttack : MonsterStateAbstract
             _ownerMonster.StopCoroutine(_attackCoroutine);
             _attackCoroutine = null;
         }
+    }
+
+    public override void FixedUpdateState()
+    {
+        Monster belowMonster = _ownerMonster.FindBelowMonster(onlyGrounded_:true);
+        if (belowMonster != null && belowMonster.StateModule.GetCurrentStateType() != MonsterStateType.BACKWARD)
+        {
+            // 아래 몬스터의 상태를 BACKWARD 변경
+            MonsterStateBackward.Params backwardParams = new MonsterStateBackward.Params();
+            backwardParams.targetPosX = _ownerMonster.transform.position.x + (_ownerMonster.GetCollisionRadius() * 2f);
+            belowMonster.StateModule.ChangeState(MonsterStateType.BACKWARD, backwardParams);
+        }
+
+        if (_ownerMonster.MovementModule.IsGrounded == false && _ownerMonster.MovementModule.MovementStateType != MonsterMovementStateType.FALL)
+            _ownerMonster.MovementModule.Fall(_ownerMonster.MovementModule.GroundPosY);
     }
 
     public override MonsterStateType GetStateType()
@@ -40,14 +55,6 @@ public class MonsterStateAttack : MonsterStateAbstract
         // 공격이 완료될 때까지 대기(에니메이션이 없어 시간으로 처리)
         yield return new WaitForSeconds(0.3f);
 
-        canTransitionToOtherState = true;
-        Monster belowMonster = _ownerMonster.FindBelowMonster();
-        if (belowMonster != null)
-        {
-            // 아래 몬스터의 상태를 BACKWARD 변경
-            belowMonster.StateModule.ChangeState(MonsterStateType.BACKWARD);
-        }
-
         if (_ownerMonster.CanAttack())
         {
             canTransitionToOtherState = false;
@@ -55,6 +62,7 @@ public class MonsterStateAttack : MonsterStateAbstract
         }
         else
         {
+            canTransitionToOtherState = true;
             _ownerMonster.StateModule.ChangeState(MonsterStateType.FORWARD);
         }
     }

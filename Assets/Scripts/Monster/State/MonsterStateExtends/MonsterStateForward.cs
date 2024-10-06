@@ -3,7 +3,7 @@ public class MonsterStateForward : MonsterStateAbstract
     public MonsterStateForward(MonsterStateModule ownerStateModule_, Monster ownerMonster_)
         : base(ownerStateModule_, ownerMonster_) { }
 
-    public override void EnterState()
+    public override void EnterState(ParamsAbstract params_)
     {
         canTransitionToOtherState = true;
         _ownerMonster.MovementModule.StartMoveForward();
@@ -18,7 +18,16 @@ public class MonsterStateForward : MonsterStateAbstract
         }
         else
         {
-            Monster forwardMonster = _ownerMonster.FindForwardMonster();
+            if (_ownerMonster.MovementModule.IsGrounded == false)
+            {
+                Monster belowMonster = _ownerMonster.FindBelowMonster();
+                if (!belowMonster || !belowMonster.FindForwardMonsterWithoutJumpOrFall() || !belowMonster.FindBehindMonster())
+                {
+                    float targetPosY = _ownerMonster.transform.position.y - (_ownerMonster.GetCollisionRadius() * 2f);
+                    _ownerMonster.MovementModule.Fall(targetPosY);
+                }
+            }
+            Monster forwardMonster = _ownerMonster.FindForwardMonsterWithoutJumpOrFall();
             if (forwardMonster)
             {
                 _ownerStateModule.ChangeState(MonsterStateType.JUMP);

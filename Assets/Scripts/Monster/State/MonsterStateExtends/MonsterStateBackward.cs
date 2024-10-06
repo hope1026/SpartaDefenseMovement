@@ -3,17 +3,33 @@ using UnityEngine;
 
 public class MonsterStateBackward : MonsterStateAbstract
 {
-    private Coroutine _backwardCoroutine = null;
-    public MonsterStateBackward(MonsterStateModule ownerStateModule_, Monster ownerMonster_)
-        : base(ownerStateModule_, ownerMonster_)
+    public class Params : ParamsAbstract
     {
+        public float targetPosX;
     }
 
-    public override void EnterState()
+    private Coroutine _backwardCoroutine = null;
+
+    public MonsterStateBackward(MonsterStateModule ownerStateModule_, Monster ownerMonster_)
+        : base(ownerStateModule_, ownerMonster_) { }
+
+    public override void EnterState(ParamsAbstract params_)
     {
         canTransitionToOtherState = false;
-        PlayBackward();
-        _ownerMonster.MovementModule.StartMoveBackward();
+        _backwardCoroutine = _ownerMonster.StartCoroutine(WaitingForBackwardCoroutine());
+        if (params_ is Params backwardParams)
+        {
+            _ownerMonster.MovementModule.StartMoveBackward(backwardParams.targetPosX);
+            Monster behindMonster = _ownerMonster.FindBehindMonster();
+            if (behindMonster != null &&
+                (behindMonster.StateModule.GetCurrentStateType() == MonsterStateType.FORWARD ||
+                 behindMonster.StateModule.GetCurrentStateType() == MonsterStateType.BACKWARD))
+            {
+                Params nextMonsterBackwardParams = new Params();
+                nextMonsterBackwardParams.targetPosX = backwardParams.targetPosX + (_ownerMonster.GetCollisionRadius() * 1.5f);
+                behindMonster.StateModule.ChangeState(MonsterStateType.BACKWARD, nextMonsterBackwardParams);
+            }
+        }
     }
 
     public override void ExitState()
@@ -25,32 +41,24 @@ public class MonsterStateBackward : MonsterStateAbstract
         }
     }
 
+    private IEnumerator WaitingForBackwardCoroutine()
+    {
+        // 이동이 완료될 때까지 대기(에니메이션이 없어 시간으로 처리)
+        while (true)
+        {
+            yield return new WaitForSeconds(0.1f);
+
+            Monster behindMonster = _ownerMonster.FindBehindOrAboveMonster();
+            if (behindMonster == null)
+            {
+                canTransitionToOtherState = true;
+                _ownerStateModule.ChangeState(MonsterStateType.FORWARD);
+            }
+        }
+    }
+
     public override MonsterStateType GetStateType()
     {
         return MonsterStateType.BACKWARD;
-    }
-
-    private void PlayBackward()
-    {
-        _backwardCoroutine = _ownerMonster.StartCoroutine(BackwardCoroutine());
-    }
-    
-    private IEnumerator BackwardCoroutine()
-    {
-        // 이동이 완료될 때까지 대기(에니메이션이 없어 시간으로 처리)
-        yield return new WaitForSeconds(0.3f);
-        
-        //뒤에 몬스터가 있으면 뒤로 계속이동, 없으면 FORWARD 로 변경하여 점프처리 
-        Monster behindMonster = _ownerMonster.FindBehindMonster();
-        if (behindMonster != null)
-        {
-            canTransitionToOtherState = false;
-            PlayBackward();
-        }
-        else
-        {
-            canTransitionToOtherState = true;
-            _ownerStateModule.ChangeState(MonsterStateType.FORWARD);
-        }
     }
 }

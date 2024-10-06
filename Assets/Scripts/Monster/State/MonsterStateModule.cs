@@ -5,15 +5,13 @@ public class MonsterStateModule
 {
     private MonsterStateAbstract _currentState;
     private readonly Dictionary<MonsterStateType, MonsterStateAbstract> _statesByType = new Dictionary<MonsterStateType, MonsterStateAbstract>();
-    private readonly Monster _ownerMonster;
 
     public MonsterStateModule(Monster ownerMonster_)
     {
-        _ownerMonster = ownerMonster_;
-        _statesByType.Add(MonsterStateType.FORWARD, new MonsterStateForward(this, _ownerMonster));
-        _statesByType.Add(MonsterStateType.BACKWARD, new MonsterStateBackward(this, _ownerMonster));
-        _statesByType.Add(MonsterStateType.JUMP, new MonsterStateJump(this, _ownerMonster));
-        _statesByType.Add(MonsterStateType.ATTACK, new MonsterStateAttack(this, _ownerMonster));
+        _statesByType.Add(MonsterStateType.FORWARD, new MonsterStateForward(this, ownerMonster_));
+        _statesByType.Add(MonsterStateType.BACKWARD, new MonsterStateBackward(this, ownerMonster_));
+        _statesByType.Add(MonsterStateType.JUMP, new MonsterStateJump(this, ownerMonster_));
+        _statesByType.Add(MonsterStateType.ATTACK, new MonsterStateAttack(this, ownerMonster_));
     }
 
     public void Update()
@@ -21,11 +19,17 @@ public class MonsterStateModule
         _currentState.UpdateState();
     }
 
-    public void ChangeState(MonsterStateType newStateType_)
+    public void FixedUpdate()
+    {
+        _currentState.FixedUpdateState();
+    }
+
+    public void ChangeState(MonsterStateType newStateType_, MonsterStateAbstract.ParamsAbstract params_ = null)
     {
         if (CanTransition(newStateType_) == false)
             return;
 
+        MonsterStateType oldState = _currentState != null ? _currentState.GetStateType() : MonsterStateType.FORWARD;
         if (_currentState != null)
         {
             _currentState.ExitState();
@@ -33,7 +37,7 @@ public class MonsterStateModule
 
         if (_statesByType.TryGetValue(newStateType_, out MonsterStateAbstract newState))
         {
-            newState.EnterState();
+            newState.EnterState(params_);
             _currentState = newState;
         }
         else
@@ -53,7 +57,6 @@ public class MonsterStateModule
         return false;
     }
 
-    // 현재 상태의 타입을 반환하는 메소드
     public MonsterStateType GetCurrentStateType()
     {
         return _currentState.GetStateType();
