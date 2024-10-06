@@ -46,7 +46,7 @@ public class MonsterStateBackward : MonsterStateAbstract
         // 이동이 완료될 때까지 대기(에니메이션이 없어 시간으로 처리)
         while (true)
         {
-            yield return new WaitForSeconds(0.1f);
+            yield return new WaitForSeconds(0.3f);
 
             Monster behindMonster = _ownerMonster.FindBehindOrAboveMonster();
             if (behindMonster == null)

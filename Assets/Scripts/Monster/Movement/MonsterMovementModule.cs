@@ -6,7 +6,7 @@ public class MonsterMovementModule
 
     private readonly Monster _ownerMonster;
     private float _towerPosX;
-    private readonly float _moveSpeed = 1f;
+    private readonly float _moveSpeed = 1.5f;
     private float _moveSpeedRate = 1f;
     private float _normalizedMoveDirection;
     private float _gravityVelocityY = 0f;
